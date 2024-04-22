@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  benevolo.oauth-ambassador:
+    build:
+      context: .
+      dockerfile: dockerfile
+      args:
+        - PROCESS_ENGINE_TOKEN=${PROCESS_ENGINE_TOKEN}
+        - KEYCLOAK_SECRET=${KEYCLOAK_SECRET}
+    container_name: benevolo.oauth-ambassador
+    image: ghcr.io/thi24/benevolo.oauth-ambassador:${GITHUB_RUN_ID}
+    environment:
+      - TZ=Europe/Berlin
+    networks:
+      - backend
+
+networks:
+  nginx-proxy-manager:
+    external: true
