@@ -2,7 +2,7 @@ name: Deploy oauth-ambassador
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -27,12 +27,6 @@ jobs:
       run: |
         docker compose build
         docker compose push
-
-    - name: Build and push dev Docker image
-      if: github.ref == 'refs/heads/develop'
-      run: |
-        docker compose -f docker-compose-dev.yml build
-        docker compose -f docker-compose-dev.yml push
 
   deploy:
     runs-on: ubuntu-latest

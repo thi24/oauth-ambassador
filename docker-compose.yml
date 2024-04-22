@@ -12,7 +12,7 @@ services:
     environment:
       - TZ=Europe/Berlin
     networks:
-      - backend
+      - nginx-proxy-manager
 
 networks:
   nginx-proxy-manager:
