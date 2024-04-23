@@ -45,7 +45,7 @@ public class StaticResources {
     void installRoute(@Observes StartupEvent startupEvent, Router router) {
         try {
             final Undertow server1 = Undertow.builder()
-                    .addHttpListener(8081, "localhost")
+                    .addHttpListener(8081, "0.0.0.0")
                     .setHandler(exchange -> exchange.dispatch(() -> {
                         String token = exchange.getRequestHeader("Authorization");
                         // Check if a Keycloak token is present and if it is valid
