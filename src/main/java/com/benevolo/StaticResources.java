@@ -47,42 +47,44 @@ public class StaticResources {
             final Undertow server1 = Undertow.builder()
                     .addHttpListener(8081, "0.0.0.0")
                     .setHandler(exchange -> exchange.dispatch(() -> {
-                        String token = exchange.getRequestHeader("Authorization");
-                        // Check if a Keycloak token is present and if it is valid
-                        Response responseToken = null;
-                        try {
-                            responseToken = validateToken.validate(token.split(" ")[1]);
-                        } catch (WebApplicationException e) {
-                            exchange.setStatusCode(e.getResponse().getStatus());
-                            exchange.setResponseHeader("Content-Type", "application/json");
+                        if(!exchange.getRequestPath().endsWith("/api/v1/messages/Bezahlinformation/trigger")) {
+                            String token = exchange.getRequestHeader("Authorization");
+                            // Check if a Keycloak token is present and if it is valid
+                            Response responseToken = null;
                             try {
-                                exchange.getOutputStream().write(e.getResponse().getEntity().toString().getBytes());
-                            } catch (IOException ioException) {
-                                throw new RuntimeException(ioException);
+                                responseToken = validateToken.validate(token.split(" ")[1]);
+                            } catch (WebApplicationException e) {
+                                exchange.setStatusCode(e.getResponse().getStatus());
+                                exchange.setResponseHeader("Content-Type", "application/json");
+                                try {
+                                    exchange.getOutputStream().write(e.getResponse().getEntity().toString().getBytes());
+                                } catch (IOException ioException) {
+                                    throw new RuntimeException(ioException);
+                                }
+                                exchange.endExchange();
                             }
-                            exchange.endExchange();
-                        }
-                        // Handling of Token response (Username, Email, etc.)
-                        String responseBody = responseToken.readEntity(String.class);
-                        LOG.info("Token Response: " + responseBody);
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode rootNode = null;
-                        try {
-                            rootNode = mapper.readTree(responseBody);
-                        } catch (JsonProcessingException e) {
-                            // Return 401 Unauthorized
-                            exchange.setStatusCode(401);
-                            exchange.close();
-                            throw new WebApplicationException("Error parsing Token JSON", Response.Status.UNAUTHORIZED);
-                        }
-                        boolean isActive = rootNode.get("active").asBoolean();
-                        if (!isActive) {
-                            LOG.info("Token is not valid");
-                            // Return 401 Unauthorized
-                            exchange.setStatusCode(401);
-                            exchange.close();
-                        } else {
-                            LOG.info("Token is valid");
+                            // Handling of Token response (Username, Email, etc.)
+                            String responseBody = responseToken.readEntity(String.class);
+                            LOG.info("Token Response: " + responseBody);
+                            ObjectMapper mapper = new ObjectMapper();
+                            JsonNode rootNode = null;
+                            try {
+                                rootNode = mapper.readTree(responseBody);
+                            } catch (JsonProcessingException e) {
+                                // Return 401 Unauthorized
+                                exchange.setStatusCode(401);
+                                exchange.close();
+                                throw new WebApplicationException("Error parsing Token JSON", Response.Status.UNAUTHORIZED);
+                            }
+                            boolean isActive = rootNode.get("active").asBoolean();
+                            if (!isActive) {
+                                LOG.info("Token is not valid");
+                                // Return 401 Unauthorized
+                                exchange.setStatusCode(401);
+                                exchange.close();
+                            } else {
+                                LOG.info("Token is valid");
+                            }
                         }
 
                         // Gather Request Method and Path
