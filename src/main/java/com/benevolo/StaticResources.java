@@ -117,9 +117,13 @@ public class StaticResources {
                             String requestBody = s.hasNext() ? s.next() : "";
 
                             // Parse the request body into a JsonObject
-                            JsonReader jsonReader = Json.createReader(new StringReader(requestBody));
-                            JsonObject requestBodyJson = jsonReader.readObject();
-                            jsonReader.close();
+                            JsonObject requestBodyJson = null;
+                            if(!requestBody.isEmpty()) {
+                                JsonReader jsonReader = Json.createReader(new StringReader(requestBody));
+                                requestBodyJson = jsonReader.readObject();
+                                jsonReader.close();
+                            }
+
                             // Make a POST request to the Process Engine
                             try {
                                 Response processEngineResponse = processEngine.post(requestPath.substring(1), requestBodyJson, authorizationHeader);
